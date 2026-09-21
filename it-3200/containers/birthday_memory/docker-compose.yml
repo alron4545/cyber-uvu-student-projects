@@ -17,5 +17,36 @@ services:
       timeout: 5s
       retries: 10
 
+  backend:
+    build:
+      context: ./server
+    container_name: thebirthdates-api
+    restart: unless-stopped
+    environment:
+      PORT: 4000
+      PGHOST: postgres
+      PGPORT: 5432
+      PGUSER: birthday
+      PGPASSWORD: birthday
+      PGDATABASE: thebirthdates
+      PGSSL: "false"
+    ports:
+      - "4000:4000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./client
+    container_name: thebirthdates-web
+    restart: unless-stopped
+    environment:
+      VITE_API_TARGET: http://backend:4000
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
 volumes:
   thebirthdates-data:
